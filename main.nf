@@ -83,7 +83,7 @@ process Create_mask {
     atlas = nib.load("$atlas")
     data_atlas = atlas.get_fdata()
 
-    # Create masks target
+    # Create masks source
     for s in $params.source_roi:
         mask = (data_atlas == s)
         mask_img = nib.Nifti1Image(mask.astype(int), atlas.affine)
@@ -214,15 +214,19 @@ workflow {
     tractogram_for_filtering.combine(masks_source.combine(masks_target, by:0), by:0).set{data_for_filtering}
     Clean_Bundles(data_for_filtering)
 
+    /* Register bundles in common template space  */
     Clean_Bundles.out.cleaned_bundle.combine(Register_Anat.out.transformations, by:0).combine(template).set{bundle_registration}
     Register_Bundle(bundle_registration)
 
+    /* Compute inter-subject pairwise bundle comparaison  */
     Register_Bundle.out.map{[it[1].name.split('_ses-')[1].split('_L')[0], it[1]]}.groupTuple(by:0).set{bundle_comparaison_inter}
     Bundle_Pairwise_Comparaison_Inter_Subject(bundle_comparaison_inter)
 
+    /* Compute intra-subject pairwise bundle comparaison  */
     Register_Bundle.out.map{[it[0].split('_ses')[0], it[1].name.split('__')[1].split('_L_')[0], it[1]]}.groupTuple(by:[0,1]).set{bundle_comparaison_intra}
     Bundle_Pairwise_Comparaison_Intra_Subject(bundle_comparaison_intra)
 
+    /* Take screenshot of every bundle  */
     Clean_Bundles.out.cleaned_bundle.combine(ref_images, by:0).set{bundles_for_screenshot}
     bundle_QC_screenshot(bundles_for_screenshot)
 }
