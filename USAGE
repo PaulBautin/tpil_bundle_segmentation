@@ -18,10 +18,8 @@ DESCRIPTION
 
                                         [root]
                                         ├── S1
-                                        │   ├── ref_image
-                                        │   ├	└──*ref_image.nii.gz
-                                        │   ├── tractogram
-                                        │   ├	└──*tractogram.trk
+                                        │   ├── *ref_image.nii.gz
+                                        │   ├── *tractogram.trk
                                         └── S2
                                             └── *
 	
