@@ -12,4 +12,7 @@ Brainnetome atlas in MNI space: https://atlas.brainnetome.org/download.html
 
 FA template in MNI space: https://brain.labsolver.org/hcp_template.html 
 
+### Testing 
+Tested on output 2 subjects `ses_v1` and not yet on Compute Canada. 
+
 
