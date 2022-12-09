@@ -193,8 +193,8 @@ workflow {
     root = file(params.input)
     atlas = Channel.fromPath("$params.atlas")
     template = Channel.fromPath("$params.template")
-    tractogram_for_filtering = Channel.fromPath("$root/*/*__tractogram.trk").map{[it.parent.name, it]}
-    ref_images = Channel.fromPath("$root/*/*__ref_image.nii.gz").map{[it.parent.name, it]}
+    tractogram_for_filtering = Channel.fromPath("$root/**/*__tractogram.trk").map{[it.parent.name, it]}
+    ref_images = Channel.fromPath("$root/**/*__ref_image.nii.gz").map{[it.parent.name, it]}
 
     main:
     /* Register template (same space as the atlas and same contrast as the reference image) to reference image  */

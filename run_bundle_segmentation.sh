@@ -8,7 +8,7 @@
 
 my_singularity_img='/home/pabaua/dev_scil/containers/scilus_1_3_0.img' # or .sif
 my_main_nf='/home/pabaua/dev_tpil/tpil_dmri/bundle_segmentation/original/main.nf'
-my_input='/home/pabaua/dev_tpil/data/data_new_bundle'
+my_input='/home/pabaua/Documents/UdeS/2022-Aut_IMN-708/TP/data/Data_TP3/bundle_segmentation'
 my_atlas='/home/pabaua/dev_tpil/data/BN/BN_Atlas_for_FSL/Brainnetome/BNA-maxprob-thr0-1mm.nii.gz'
 my_template='/home/pabaua/dev_tpil/data/HCP/FSL_HCP1065_FA_1mm.nii.gz'
 
@@ -18,7 +18,7 @@ nextflow run $my_main_nf --input $my_input --atlas $my_atlas \
 
 
 my_main_nf_qc='/home/pabaua/dev_scil/dmriqc_flow/main.nf'
-my_input_qc='/home/pabaua/dev_tpil/results/results_new_bundle/test/results_bundle'
+my_input_qc='/home/pabaua/Documents/UdeS/2022-Aut_IMN-708/TP/data/Data_TP3/bundle_segmentation_results'
 
 NXF_VER=21.10.6 nextflow run $my_main_nf_qc -profile rbx_qc --input $my_input_qc \
     -with-singularity $my_singularity_img -resume
