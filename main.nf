@@ -169,7 +169,7 @@ process Compute_Centroid {
 
     script:
     """
-    scil_compute_centroid.py ${bundle} ${sid}__NAC_mPFC_L_centroid.trk --nb_points 50
+    scil_compute_centroid.py ${bundle} ${sid}__NAC_mPFC_L_centroid.trk --nb_points 20
     """
 }
 
