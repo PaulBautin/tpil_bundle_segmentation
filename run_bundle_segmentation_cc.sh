@@ -40,7 +40,7 @@ nextflow run $my_main_nf --input $my_input --atlas $my_atlas \
 module load nextflow/21.10.3
 
 my_main_nf_qc='/home/pabaua/projects/def-pascalt-ab/pabaua/dev_scil/dmriqc_flow/main.nf'
-my_input_qc='/home/pabaua/scratch/tpil_dev/results/clbp/22-12-01_bundle_seg/results_bundle'
+my_input_qc='/home/pabaua/scratch/tpil_dev/results/clbp/23-02-13_accumbofrontal_segmentation/results_bundle'
 
 NXF_VER=21.10.3 nextflow run $my_main_nf_qc -profile rbx_qc --input $my_input_qc \
     -with-singularity $my_singularity_img -resume
