@@ -20,7 +20,7 @@ log.info "=================================="
 log.info "Start time: $workflow.start"
 log.info ""
 log.info "[Input info]"
-log.info "Input Folder: $params.input"
+log.info "Input TractoFlow Folder: $params.input_tr"
 log.info "Atlas: $params.atlas"
 log.info "Template: $params.template"
 log.info ""
@@ -40,79 +40,82 @@ workflow.onComplete {
     log.info "Execution duration: $workflow.duration"
 }
 
-process Register_Anat {
+
+process Subcortex_segmentation {
     input:
-    tuple val(sid), file(native_anat), file(template)
+    tuple val(sid), path(T1nativepro_brain)
 
     output:
-    tuple val(sid), file("${sid}__output0GenericAffine.mat"), file("${sid}__output1Warp.nii.gz"), emit: transformations
-    tuple val(sid), file("${sid}__native_anat.nii.gz"), emit: native_anat
+    tuple val(sid), file("${sid}__all_fast_firstseg.nii.gz"), emit: sub_parcels
 
     script:
     """
-    antsRegistrationSyN.sh -d 3 -f ${native_anat} -m ${template} -t s -o ${sid}__output
-    cp ${native_anat} ${sid}__native_anat.nii.gz
+    run_first_all -i ${T1nativepro_brain} -o ${sid}_ -b -v
+    """
+}
+
+
+process Subcortex_registration {
+    input:
+    tuple val(sid), path(sub_parcels), path(affine), path(warp), file(t1_diffpro_brain)
+
+    output:
+    tuple val(sid), file("${sid}__all_fast_firstseg_warped.nii.gz"), emit: sub_parcels_diff
+    tuple val(sid), file(t1_diffpro_brain)
+
+    script:
+    """
+    antsApplyTransforms -d 3 -i ${sub_parcels} -r ${t1_diffpro_brain} \
+        -o ${sid}__all_fast_firstseg_warped.nii.gz -n genericLabel \
+        -t ${warp} ${affine}  
+    scil_image_math.py addition ${sid}__all_fast_firstseg_warped.nii.gz 1000 ${sid}__all_fast_firstseg_warped.nii.gz --exclude_background --data_type int16 -f
+    """
+}
+
+process Register_Anat {
+    input:
+    tuple val(sid), file(fa_diff_brain), file(template)
+
+    output:
+    tuple val(sid), file("${sid}__output0GenericAffine.mat"), file("${sid}__output1Warp.nii.gz"), emit: transformations
+    tuple val(sid), file("${sid}__fa_diff_brain.nii.gz"), emit: fa_diff_brain
+
+    script:
+    """
+    antsRegistrationSyNQuick.sh -d 3 -f ${fa_diff_brain} -m ${template} -t s -o ${sid}__output
+    cp ${fa_diff_brain} ${sid}__fa_diff_brain.nii.gz
     """
 }
 
 process Apply_transform {
     input:
-    tuple val(sid), file(affine), file(warp), file(native_anat), file(atlas)
+    tuple val(sid), file(affine), file(warp), file(fa_diff_brain), file(atlas)
 
     output:
     tuple val(sid), file("${sid}__atlas_transformed.nii.gz"), emit: atlas_transformed
 
     script:
     """
-    antsApplyTransforms -d 3 -i ${atlas} -t ${warp} -t ${affine} -r ${native_anat} -o ${sid}__atlas_transformed.nii.gz -n genericLabel -u int
+    antsApplyTransforms -d 3 -i ${atlas} -t ${warp} -t ${affine} -r ${fa_diff_brain} -o ${sid}__atlas_transformed.nii.gz -n genericLabel -u int
     """
 }
 
-process Create_mask {
+process Tractography_filtering {
     input:
-    tuple val(sid), path(atlas)
+    tuple val(sid), path(tracto_pft), path(seg_first), file(atlas_transformed)
 
     output:
-    tuple val(sid), file("${sid}__mask_source_*.nii.gz"), emit: masks_source
-    tuple val(sid), file("${sid}__mask_target_*.nii.gz"), emit: masks_target
+    tuple val(sid), file("${bname}__NAc_proj.trk"), file("${bname}__accumbofrontal.trk")
+    tuple val(sid), file("${bname}__accumbofrontal_cleaned.trk"), emit: cleaned_bundle
 
     script:
+    bname = tracto_pft.name.split('.trk')[0]
     """
-    #!/usr/bin/env python3
-    import nibabel as nib
-    atlas = nib.load("$atlas")
-    data_atlas = atlas.get_fdata()
+    scil_image_math.py convert ${seg_first} seg_first.nii.gz --data_type uint16 -f
+    scil_filter_tractogram.py ${tracto_pft} ${bname}__NAc_proj.trk --atlas_roi ${seg_first} 1026 any include -f -v
 
-    # Create masks source
-    for s in $params.source_roi:
-        mask = (data_atlas == s)
-        mask_img = nib.Nifti1Image(mask.astype(int), atlas.affine)
-        nib.save(mask_img, '${sid}__mask_target_'+str(s)+'.nii.gz')
-
-    # Create masks target
-    for t in $params.target_roi:
-        mask = (data_atlas == t)
-        mask_img = nib.Nifti1Image(mask.astype(int), atlas.affine)
-        nib.save(mask_img, '${sid}__mask_source_'+str(t)+'.nii.gz')
-    """
-}
-
-process Clean_Bundles {
-    memory_limit='6 GB'
-
-    input:
-    tuple val(sid), file(tractogram), file(mask_source), file(mask_target)
-
-    output:
-    tuple val(sid), file("${sid}__${source_nb}_${target_nb}_L_cleaned.trk"), emit: cleaned_bundle
-    tuple val(sid), file("${sid}__${source_nb}_${target_nb}_L_filtered.trk"), emit: filtered_bundle
-
-    script:
-    source_nb = mask_source.name.split('_source_')[1].split('.nii')[0]
-    target_nb = mask_target.name.split('_target_')[1].split('.nii')[0]
-    """
-    scil_filter_tractogram.py ${tractogram} ${sid}__${source_nb}_${target_nb}_L_filtered.trk --drawn_roi ${mask_target} either_end include --drawn_roi ${mask_source} either_end include
-    scil_outlier_rejection.py ${sid}__${source_nb}_${target_nb}_L_filtered.trk ${sid}__${source_nb}_${target_nb}_L_cleaned.trk --alpha 0.6
+    scil_filter_tractogram.py ${bname}__NAc_proj.trk ${bname}__accumbofrontal.trk --atlas_roi ${atlas_transformed} 27 any include -f -v
+    scil_outlier_rejection.py ${bname}__accumbofrontal.trk ${bname}__accumbofrontal_cleaned.trk --alpha 0.4
     """
 }
 
@@ -189,44 +192,54 @@ process bundle_QC_screenshot {
 
 
 workflow {
-    /* Input files to fetch */
-    root = file(params.input)
+    // Input files to fetch
+    input_tractoflow = file(params.input_tr)
     atlas = Channel.fromPath("$params.atlas")
     template = Channel.fromPath("$params.template")
-    tractogram_for_filtering = Channel.fromPath("$root/**/*__tractogram.trk").map{[it.parent.name, it]}
-    ref_images = Channel.fromPath("$root/**/*__ref_image.nii.gz").map{[it.parent.name, it]}
+
+    t1_nativepro_brain = Channel.fromPath("$input_tractoflow/*/Crop_T1/*__t1_bet_cropped.nii.gz").map{[it.parent.parent.name, it]}
+    t1_diffpro_brain = Channel.fromPath("$input_tractoflow/*/Register_T1/*__t1_warped.nii.gz").map{[it.parent.parent.name, it]}
+    t1_to_diff_affine = Channel.fromPath("$input_tractoflow/*/Register_T1/*__output0GenericAffine.mat").map{[it.parent.parent.name, it]}
+    t1_to_diff_warp = Channel.fromPath("$input_tractoflow/*/Register_T1/*__output1Warp.nii.gz").map{[it.parent.parent.name, it]}
+    t1_to_diff_inv_warp = Channel.fromPath("$input_tractoflow/*/Register_T1/*__output1InverseWarp.nii.gz").map{[it.parent.parent.name, it]}
+
+    fa_diff_brain = Channel.fromPath("$input_tractoflow/*/DTI_Metrics/*__fa.nii.gz").map{[it.parent.parent.name, it]}
+
+    dwi_tracto_pft = Channel.fromPath("$input_tractoflow/*/PFT_Tracking/*__pft_tracking_prob_wm_seed_0.trk").map{[it.parent.parent.name, it]}
 
     main:
-    /* Register template (same space as the atlas and same contrast as the reference image) to reference image  */
-    ref_images.combine(template).set{data_registration}
+    // Subcortex segmentation with first
+    Subcortex_segmentation(t1_nativepro_brain)
+
+    // Subcortex segmentation registration to diffusion space add 1000 to parcels to not be confused with cortex
+    Subcortex_segmentation.out.sub_parcels.combine(t1_to_diff_affine, by:0).combine(t1_to_diff_warp, by:0).combine(t1_diffpro_brain, by:0).set{data_sub_reg}
+    Subcortex_registration(data_sub_reg)
+
+    // Register template (same space as the atlas and same contrast as the reference image) to reference image
+    fa_diff_brain.combine(template).set{data_registration}
     Register_Anat(data_registration)
 
-    /* Appy registration transformation to atlas  */
-    Register_Anat.out.transformations.join(ref_images, by:0).combine(atlas).set{data_transfo}
+    // Appy registration transformation to atlas
+    Register_Anat.out.transformations.join(fa_diff_brain, by:0).combine(atlas).set{data_transfo}
     Apply_transform(data_transfo)
 
-    /* Create ROI masks (based on atlas) for filtering tractogram  */
-    Create_mask(Apply_transform.out.atlas_transformed)
+    // filter tractogram first on NAc (parcel 1026) then on mPFC (parcel 27)
+    dwi_tracto_pft.combine(Subcortex_registration.out.sub_parcels_diff, by:0).combine(Apply_transform.out.atlas_transformed, by:0).set{data_tracto_filt}
+    Tractography_filtering(data_tracto_filt)
 
-    /* Filter tractogram based on ROI masks  */
-    masks_target = Create_mask.out.masks_target.transpose()
-    masks_source = Create_mask.out.masks_source.transpose()
-    tractogram_for_filtering.combine(masks_source.combine(masks_target, by:0), by:0).set{data_for_filtering}
-    Clean_Bundles(data_for_filtering)
-
-    /* Register bundles in common template space  */
-    Clean_Bundles.out.cleaned_bundle.combine(Register_Anat.out.transformations, by:0).combine(template).set{bundle_registration}
+    // Register bundles in common template space
+    Tractography_filtering.out.cleaned_bundle.combine(Register_Anat.out.transformations, by:0).combine(template).set{bundle_registration}
     Register_Bundle(bundle_registration)
 
-    /* Compute inter-subject pairwise bundle comparaison  */
-    Register_Bundle.out.map{[it[1].name.split('_ses-')[1].split('_L')[0], it[1]]}.groupTuple(by:0).set{bundle_comparaison_inter}
+    // Compute inter-subject pairwise bundle comparaison
+    Register_Bundle.out.map{[it[1].name.split('_ses-')[1].split('_cleaned')[0], it[1]]}.groupTuple(by:0).set{bundle_comparaison_inter}
     Bundle_Pairwise_Comparaison_Inter_Subject(bundle_comparaison_inter)
 
-    /* Compute intra-subject pairwise bundle comparaison  */
-    Register_Bundle.out.map{[it[0].split('_ses')[0], it[1].name.split('__')[1].split('_L_')[0], it[1]]}.groupTuple(by:[0,1]).set{bundle_comparaison_intra}
+    // Compute intra-subject pairwise bundle comparaison
+    Register_Bundle.out.map{[it[0].split('_ses')[0], it[1].name.split('__')[1].split('_cleaned')[0], it[1]]}.groupTuple(by:[0,1]).set{bundle_comparaison_intra}
     Bundle_Pairwise_Comparaison_Intra_Subject(bundle_comparaison_intra)
 
-    /* Take screenshot of every bundle  */
-    Clean_Bundles.out.cleaned_bundle.combine(ref_images, by:0).set{bundles_for_screenshot}
+    // Take screenshot of every bundle
+    Tractography_filtering.out.cleaned_bundle.combine(fa_diff_brain, by:0).set{bundles_for_screenshot}
     bundle_QC_screenshot(bundles_for_screenshot)
 }
