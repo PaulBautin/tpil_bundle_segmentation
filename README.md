@@ -42,21 +42,21 @@ To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractomet
 ## Installations
 <details><summary><b>Nextflow</b></summary>
 
-Install java by running command: sudo apt install default-jre and sudo apt install default-jdk
+Install java by running command: `sudo apt install default-jre` and `sudo apt install default-jdk`
 
 Download latest nextflow version (not edge version) from [Github releases](https://github.com/nextflow-io/nextflow/releases)
 
-Make the binary executable on your system by running chmod +x nextflow.
+Make the binary executable on your system by running `chmod +x nextflow`.
 
-Optionally, move the nextflow file to a directory accessible by your $PATH variable (this is only required to avoid remembering and typing the full path to nextflow each time you need to run it). Example: sudo mv ~/Downloads/nextflow /usr/local/bin
+Optionally, move the nextflow file to a directory accessible by your $PATH variable (this is only required to avoid remembering and typing the full path to nextflow each time you need to run it). Example: `sudo mv ~/Downloads/nextflow /usr/local/bin`
 
-You can temporarily switch to a specific version of Nextflow by prefixing the nextflow command with the NXF_VER environment variable. For example: NXF_VER=20.04.0 nextflow run
+You can temporarily switch to a specific version of Nextflow by prefixing the nextflow command with the NXF_VER environment variable. For example: `NXF_VER=20.04.0 nextflow run`
 </details>
 <details><summary><b>Singularity</b></summary>
 
 Singularity is used to package scientific software and deploy that package to different clusters having the same environment.
 
-Install singularity with the debian package on the [Github repository](https://github.com/sylabs/singularity/releases) releases then run download folder: sudo dpkg -i singularity-ce_3.10.0-jammy_amd64.deb
+Install singularity with the debian package on the [Github repository](https://github.com/sylabs/singularity/releases) releases then run download folder: `sudo dpkg -i singularity-ce_3.10.0-jammy_amd64.deb`
 </details>
 
 ## Testing
