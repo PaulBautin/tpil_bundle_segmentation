@@ -105,17 +105,17 @@ process Tractography_filtering {
     tuple val(sid), path(tracto_pft), path(seg_first), file(atlas_transformed)
 
     output:
-    tuple val(sid), file("${bname}__NAc_proj.trk"), file("${bname}__accumbofrontal.trk")
-    tuple val(sid), file("${bname}__accumbofrontal_cleaned.trk"), emit: cleaned_bundle
+    tuple val(sid), file("${bname}__source_proj.trk"), file("${bname}__${params.bundle_name}.trk")
+    tuple val(sid), file("${bname}__${params.bundle_name}_cleaned.trk"), emit: cleaned_bundle
 
     script:
     bname = tracto_pft.name.split('.trk')[0]
     """
     scil_image_math.py convert ${seg_first} seg_first.nii.gz --data_type uint16 -f
-    scil_filter_tractogram.py ${tracto_pft} ${bname}__NAc_proj.trk --atlas_roi ${seg_first} 1026 any include -f -v
+    scil_filter_tractogram.py ${tracto_pft} ${bname}__source_proj.trk --atlas_roi ${seg_first} $params.source_roi any include -f -v
 
-    scil_filter_tractogram.py ${bname}__NAc_proj.trk ${bname}__accumbofrontal.trk --atlas_roi ${atlas_transformed} 27 any include -f -v
-    scil_outlier_rejection.py ${bname}__accumbofrontal.trk ${bname}__accumbofrontal_cleaned.trk --alpha 0.4
+    scil_filter_tractogram.py ${bname}__source_proj.trk ${bname}__${params.bundle_name}.trk --atlas_roi ${atlas_transformed} $params.target_roi any include -f -v
+    scil_outlier_rejection.py ${bname}__${params.bundle_name}.trk ${bname}__${params.bundle_name}_cleaned.trk --alpha $params.outlier_alpha
     """
 }
 
@@ -159,20 +159,6 @@ process Bundle_Pairwise_Comparaison_Intra_Subject {
     script:
     """
     scil_evaluate_bundles_pairwise_agreement_measures.py $bundles ${b_names}_Pairwise_Comparaison.json
-    """
-}
-
-
-process Compute_Centroid {
-    input:
-    tuple val(sid), file(bundle)
-
-    output:
-    tuple val(sid), file("${sid}__NAC_mPFC_L_centroid.trk")
-
-    script:
-    """
-    scil_compute_centroid.py ${bundle} ${sid}__NAC_mPFC_L_centroid.trk --nb_points 20
     """
 }
 

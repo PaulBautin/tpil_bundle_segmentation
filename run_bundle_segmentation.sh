@@ -21,6 +21,10 @@ nextflow run $my_main_nf \
     --input_tr $my_input_tr \
     --atlas $my_atlas \
     --template $my_template \
+    --source_roi 1026 \
+    --target_roi 27 \
+    --outlier_alpha 0.4 \
+    --bundle_name 'accumbofrontal' \
     -with-singularity $my_singularity_img -resume
 
 
