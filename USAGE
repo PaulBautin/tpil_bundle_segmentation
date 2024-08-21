@@ -4,7 +4,7 @@ TPIL Bundle Segmentation Pipeline
 USAGE
 
 Command line:
-nextflow run main.nf --input <...> --atlas <...> --template <...> [OPTIONAL_ARGUMENTS]
+nextflow run main.nf --input_tr <...> --atlas <...> --template <...> [OPTIONAL_ARGUMENTS]
 
 Ressources:
 Prebuild Singularity images: https://scil.usherbrooke.ca/pages/containers/
@@ -14,15 +14,7 @@ FA template in MNI space: https://brain.labsolver.org/hcp_template.html
 
 DESCRIPTION
 
-    --input=/path/to/[root]             Root folder containing multiple subjects
-
-                                        [root]
-                                        ├── S1
-                                        │   ├── *ref_image.nii.gz
-                                        │   ├── *tractogram.trk
-                                        └── S2
-                                            └── *
-	
+    --input_tr                      Tractoflow results folder
     --atlas                 		Path to atlas. Example: BNA-maxprob-thr0-1mm.nii.gz
     --template                 		Path to template. Example: FSL_HCP1065_FA_1mm.nii.gz 
     
@@ -34,8 +26,9 @@ Files should come out of the Tractoflow pipeline, with the following source:
 OPTIONAL ARGUMENTS (current value)
 
     --outlier_alpha                         Remove spurious streamlines based on shape ($outlier_alpha)
-    --source_roi                            sub-cortical ROI. Example: [223] ($source_roi)
-    --target_roi                            cortical ROI ($target_roi). Example: [27, 45, 47] ($target_roi)
+    --source_roi                            sub-cortical ROI. Example: 1026 ($source_roi)
+    --target_roi                            cortical ROI ($target_roi). Example: 27 ($target_roi)
+    --bundle_name                           Name of bundle to segment . Example 'accumbofrontal' ($bundle_name)
     
     --processes                             The number of parallel processes to launch ($cpu_count).
                                             Only affects the local scheduler.
