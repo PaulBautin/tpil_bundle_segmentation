@@ -36,7 +36,7 @@ By default outputs will be stored in `results_bundle`.
 
 <details><summary><b>Tractometry</b></summary>
   
-To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractometry.sh](https://github.com/scilus/combine_flows/blob/main/tree_for_tractometry.sh) must be slightly modified. Use `tree_for_tractometry_p.sh` present in this directory to add the segmented bundle to be used for tractometry.
+To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractometry.sh](https://github.com/scilus/combine_flows/blob/main/tree_for_tractometry.sh) must be slightly modified. Use `tree_for_tractometry_p.sh` present in this directory to add the segmented bundle to to the tractometry pipeline tree.
 </details>
 
 
