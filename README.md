@@ -41,7 +41,7 @@ To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractomet
 
 
 ## Testing
-Tested locally on 3 subjects `ses_v1`. FSL (with command run_first_all) must be installed locally. WAS NOT TESTED on compute canada because FSL FIRST is not in the SCIl Singularity container anymore -- a solution would to be use another container.
+Tested locally on 3 subjects `ses_v1`. FSL (with command run_first_all) must be installed locally. WAS NOT TESTED on compute canada because FSL FIRST is not in the SCIl Singularity container anymore -- a solution would be to use another container.
 
 
 ## How it works?
