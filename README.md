@@ -44,7 +44,7 @@ To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractomet
 
 Install java by running command: sudo apt install default-jre and sudo apt install default-jdk
 
-Download latest nextflow version (not edge version) from Github releases
+Download latest nextflow version (not edge version) from [Github releases](https://github.com/nextflow-io/nextflow/releases)
 
 Make the binary executable on your system by running chmod +x nextflow.
 
