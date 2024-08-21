@@ -1,7 +1,7 @@
 # tpil_bundle_segmentation
 
 ## Usage
-This repository uses output folder of tractoflow to segment a bundle of interest. Here are the steps to segment bundles of interest:
+This repository uses output folder of tractoflow to segment a bundle of interest. Here are the steps to segment bundles of interest you might need singularity and nextflow (installation instructions are present in next section):
 
 <details><summary><b>Steps</b></summary>
 
@@ -39,6 +39,25 @@ By default outputs will be stored in `results_bundle`.
 To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractometry.sh](https://github.com/scilus/combine_flows/blob/main/tree_for_tractometry.sh) must be slightly modified. Use `tree_for_tractometry_p.sh` present in this directory to add the segmented bundle to to the tractometry pipeline tree.
 </details>
 
+## Installations
+<details><summary><b>Nextflow</b></summary>
+
+Install java by running command: sudo apt install default-jre and sudo apt install default-jdk
+
+Download latest nextflow version (not edge version) from Github releases
+
+Make the binary executable on your system by running chmod +x nextflow.
+
+Optionally, move the nextflow file to a directory accessible by your $PATH variable (this is only required to avoid remembering and typing the full path to nextflow each time you need to run it). Example: sudo mv ~/Downloads/nextflow /usr/local/bin
+
+You can temporarily switch to a specific version of Nextflow by prefixing the nextflow command with the NXF_VER environment variable. For example: NXF_VER=20.04.0 nextflow run
+</details>
+<details><summary><b>Singularity</b></summary>
+
+Singularity is used to package scientific software and deploy that package to different clusters having the same environment.
+
+Install singularity with the debian package on the [Github repository](https://github.com/sylabs/singularity/releases) releases then run download folder: sudo dpkg -i singularity-ce_3.10.0-jammy_amd64.deb
+</details>
 
 ## Testing
 Tested locally on 3 subjects `ses_v1`. FSL (with command run_first_all) must be installed locally. WAS NOT TESTED on compute canada because FSL FIRST is not in the SCIl Singularity container anymore -- a solution would be to use another container.
