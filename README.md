@@ -12,7 +12,7 @@ This repository uses output folder of tractoflow to segment a bundle of interest
      - Brainnetome atlas in MNI space ([BN_Atlas_246_1mm.nii.gz](https://pan.cstcloud.cn/s/gfGflpp3Q0E)): https://atlas.brainnetome.org/download.html
      - FA template in MNI space ([FSL_HCP1065_FA_1mm.nii.gz](https://pitt-my.sharepoint.com/:u:/g/personal/yehfc_pitt_edu/EV3F_eZvN6NDv-PN4I05dzwBu1kLrqnK_N6VplznsVQv0Q?e=wXGOo7)): https://brain.labsolver.org/hcp_template.html
   4. Open file `run_bundle_segmentation.sh` in file editor and modify all "my_*" file paths
-  5. Run (in output result folder) with: `bash run_bundle_segmentation.sh`
+  5. Run (in output result folder) with: `bash run_bundle_segmentation.sh`. The code can be run with other parcels by modifying `--source_ROI`, `--target_ROI`, and other bundle streamline outlier removal variable `--outlier_alpha` in the main run bash file `run_bundle_segmentation.sh`
 </details>
 
 <details><summary><b>Output</b></summary>
@@ -35,14 +35,13 @@ By default outputs will be stored in `results_bundle`.
 </details>
 
 <details><summary><b>Tractometry</b></summary>
-
+  
+To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractometry.sh](https://github.com/scilus/combine_flows/blob/main/tree_for_tractometry.sh) must be slightly modified. Use `tree_for_tractometry_p.sh` present in this directory to add the segmented bundle to be used for tractometry.
 </details>
 
 
 ## Testing
 Tested locally on 3 subjects `ses_v1`. FSL (with command run_first_all) must be installed locally. WAS NOT TESTED on compute canada because FSL FIRST is not in the SCIl Singularity container anymore -- a solution would to be use another container.
-
-Can be tested with other parcels by modifying `process Tractography_filtering`
 
 
 ## How it works?
