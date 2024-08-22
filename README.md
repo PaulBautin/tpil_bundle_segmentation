@@ -42,21 +42,25 @@ To run Tractometry on the segmented bundle the [combine_flows/tree_for_tractomet
 ## Installations
 <details><summary><b>Nextflow</b></summary>
 
-Install java by running command: `sudo apt install default-jre` and `sudo apt install default-jdk`
-
-Download latest nextflow version (not edge version) from [Github releases](https://github.com/nextflow-io/nextflow/releases)
-
-Make the binary executable on your system by running `chmod +x nextflow`.
+Follow SCIL nextflow installation procedure: [https://scil-documentation.readthedocs.io/en/latest/arriving/setup_computer.html#nextflow](https://scil-documentation.readthedocs.io/en/latest/arriving/setup_computer.html#nextflow)
 
 Optionally, move the nextflow file to a directory accessible by your $PATH variable (this is only required to avoid remembering and typing the full path to nextflow each time you need to run it). Example: `sudo mv ~/Downloads/nextflow /usr/local/bin`
 
 You can temporarily switch to a specific version of Nextflow by prefixing the nextflow command with the NXF_VER environment variable. For example: `NXF_VER=20.04.0 nextflow run`
 </details>
-<details><summary><b>Singularity</b></summary>
+<details><summary><b>Singularity (Apptainer)</b></summary>
 
-Singularity is used to package scientific software and deploy that package to different clusters having the same environment.
+Singularity (Apptainer) is used to package scientific software and deploy that package to different clusters having the same environment. However, it is a linux only friendly platform (use Docker to run locally with mac or windows). Installation intructions can be found: [https://scil-documentation.readthedocs.io/en/latest/arriving/setup_computer.html#apptainer](https://scil-documentation.readthedocs.io/en/latest/arriving/setup_computer.html#apptainer)
 
-Install singularity with the debian package on the [Github repository](https://github.com/sylabs/singularity/releases) releases then run download folder: `sudo dpkg -i singularity-ce_3.10.0-jammy_amd64.deb`
+Launch `run_bundle_segmentation.sh` and make sure nextflow is run with option: `-with-singularity $my_singularity_img`
+</details>
+<details><summary><b>Docker</b></summary>
+
+Contrary to Apptainer, Docker containers cannot run without elevated privileges or root access; therefore, Docker is not available on High Performance Computers from the Digital Alliance of Canada. Installation intructions can be found: [https://scil-documentation.readthedocs.io/en/latest/arriving/setup_computer.html#docker](https://scil-documentation.readthedocs.io/en/latest/arriving/setup_computer.html#docker)
+
+Once docker is installed, it is possible to run command: `docker pull scilus/scilus:1.6.0`
+
+Launch `run_bundle_segmentation.sh` and make sure nextflow is run with option: `-with-docker scilus/scilus:1.6.0`
 </details>
 
 ## Testing
