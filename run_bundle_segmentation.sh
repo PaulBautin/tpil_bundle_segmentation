@@ -37,3 +37,5 @@ nextflow run $my_main_nf \
 #NXF_VER=21.10.6 nextflow run $my_main_nf_qc -profile rbx_qc --input $my_input_qc \
 #    -with-singularity $my_singularity_img -resume
 
+#to run tractometry flow locally on Pascal computer 
+#NXF_VER=21.10.6 nextflow run /Users/pascaltravail/Dropbox/Prof_Sherbrooke/Recherche/Projets_humains/Resultats/Diffusion/Test_Paul_pipeline_accumbo/tractometry_flow/main.nf --input /Users/pascaltravail/Dropbox/Prof_Sherbrooke/Recherche/Projets_humains/Resultats/Diffusion/Test_Paul_pipeline_accumbo/output/tree_tractometry -profile macos --use_provided_centroids false -with-docker scilus/scilus:1.6.0 -resume
