@@ -25,7 +25,7 @@ nextflow run $my_main_nf \
     --target_roi 27 \
     --outlier_alpha 0.4 \
     --bundle_name 'accumbofrontal' \
-    -with-singularity $my_singularity_img -resume
+    -with-singularity $my_singularity_img -resume # for use with docker container: -with-docker scilus/scilus:1.6.0
 
 
 #my_main_nf_qc='/home/pabaua/dev_scil/dmriqc_flow/main.nf'
